@@ -1,5 +1,4 @@
-name: Build APK
-
+name: EAS Build
 on:
   workflow_dispatch:
 
@@ -7,10 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -18,24 +17,16 @@ jobs:
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Install Expo Dev Client
-        run: npx expo install expo-dev-client
+      - name: Build on EAS
+        run: eas build --platform android --profile preview --non-interactive
 
-      - name: Prebuild Android
-        run: npx expo prebuild --platform android
-
-      - name: Build APK
-        run: cd android && ./gradlew assembleRelease
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: eas-build
